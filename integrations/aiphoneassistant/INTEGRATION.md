@@ -35,7 +35,7 @@ Manual, repo-by-repo equivalent of the above: keep reading.
 
 ## Tier B — manual build-tree setup (equivalent to Tier A, step by step)
 
-1. Put the app source into the build tree:
+1. Put the app source into the build tree — either by hand:
 
    ```bash
    AOSP_ROOT=/path/to/lineage
@@ -45,7 +45,11 @@ Manual, repo-by-repo equivalent of the above: keep reading.
    cp "$APP_SOURCE"/{Android.bp,AndroidManifest.xml,privapp-permissions-aiphoneassistant.xml,proguard.flags} "$APP_DEST/"
    ```
 
-   (`build_lmi.sh` in the app repo automates this for lmi.)
+   or with the app repo's generic wrapper (no device-specific logic):
+
+   ```bash
+   ./build.sh /path/to/lineage <product>-<release>-<variant> <product>
+   ```
 
 2. Register the modules in the target's product makefile (see
    `device.mk.snippet`):
@@ -104,3 +108,12 @@ Caveats:
 - Reasoning LLMs may return empty `content` (chain-of-thought only): the app
   falls back to `reasoning_content` and uses a large `max_tokens`; keep the
   gateway's per-request timeout above the app's 90 s round budget.
+
+## This machine's lmi shortcuts
+
+`scripts/` keeps the lmi-hardcoded wrappers that used to live in the app
+repo (removed there to keep it device-neutral):
+
+- `scripts/build_lmi.sh` — app-repo `build.sh` with this machine's tree path
+  and lunch combo filled in
+- `scripts/push_lmi.sh`  — build-if-needed + `adb install -r` deploy
