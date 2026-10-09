@@ -26,6 +26,8 @@ permissions, SELinux, flashing), it belongs here.
 - [`docs/system-integrations.md`](docs/system-integrations.md) — the full
   inventory of system-side changes made so far, each with what / where / why
   and notes on generalizing to other devices and packages.
+- `lineage_agentvis_*` lunch products (root `AndroidProducts.mk`): stock
+  device product + the integration, zero upstream edits — the
 - [`integrations/aiphoneassistant/`](integrations/aiphoneassistant/) — the
   concrete artifacts for the AIPhoneAssistant integration (sepolicy rules,
   device.mk snippet, privapp allowlist) plus a step-by-step runbook.

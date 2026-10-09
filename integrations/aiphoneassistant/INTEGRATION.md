@@ -1,102 +1,96 @@
 # AIPhoneAssistant — porting guide
 
-Three tiers, pick by audience. Reference integration: LineageOS 22.2
-(Android 15), target `lmi` (Xiaomi POCO F2 Pro). Generalization notes:
-[`../../docs/system-integrations.md`](../../docs/system-integrations.md).
+How the agent app plugs into a standard AOSP/LineageOS workflow. Reference:
+LineageOS 22.2 (Android 15), device `lmi` (Xiaomi POCO F2 Pro). For the
+inventory of what/where/why: [`../../docs/system-integrations.md`](../../docs/system-integrations.md).
 
 Canonical app source: <https://github.com/inokinoki/aiphone_assistant>.
 
+## Where this plugs into the standard build flow
+
+```
+1. repo init -u <lineageos-manifest>       # stock step
+2. add .repo/local_manifests/agentvis.xml  # <-- insertion point 1 (fetch)
+3. repo sync                               # app -> packages/apps/, this repo -> vendor/agentvis/
+4. lunch lineage_agentvis_lmi-ap3a-userdebug       # <-- insertion point 2 (product choice)
+5. m bacon                                 # full image, nothing upstream modified
+```
+
+The `lineage_agentvis_*` product (registered by `AndroidProducts.mk` at the root of
+this repo) inherits the stock `lineage_lmi` product and appends the app,
+its privapp allowlist and the SELinux rules — the same pattern used by
+LineageOS for microG / /e/OS style distributions. Upstream files are never
+edited, so `repo sync` stays clean.
+
+For other devices: copy `lineage_agentvis_lmi.mk` to `lineage_agentvis_<target>.mk`, point
+the `inherit-product` line at that device's stock makefile, and register it
+in `AndroidProducts.mk`. Everything else (sepolicy private rules, app
+modules) is device-agnostic.
+
 ## Hard requirements (all tiers)
 
-- The APK must be signed with **the same platform key as the ROM** —
-  signature permissions (`READ_FRAME_BUFFER`, `INJECT_EVENTS`,
-  `INTERNAL_SYSTEM_WINDOW`, …) only grant on a matching signature. A self
-  built ROM ships AOSP testkeys (or your release keys), so build the app from
-  the same tree.
-- SELinux must allow `system_app` → SurfaceFlinger / InputManager. Either
-  baked into the image (Tier A/B) or live-patched (Tier C).
-- The app runs as `android.uid.system` and is `system_ext_specific` +
-  `privileged` — it is a system component, not a normal sideload.
+- The APK must be built **from the same tree** it will run on (platform
+  signature match) — signature permissions only grant on a matching
+  signature.
+- SELinux must allow `system_app` → SurfaceFlinger / InputManager (the
+  `lineage_agentvis_*` product adds these; see Tier B/C if you cannot use it).
+- The app runs as `android.uid.system`, `system_ext_specific` + privileged.
 
-## Tier A — ROM builders, one-time setup (recommended)
+## Tier A — build with the agentvis product (recommended)
 
-Fastest full integration, survives every future build:
+The five steps above. First full build bakes sepolicy into the image; after
+that, app-only iterations are:
 
-1. Copy `local_manifests/agentvis.xml` into `.repo/local_manifests/`, then:
-   `repo sync aiphone_assistant WD40`
-   (app → `packages/apps/AIPhoneAssistant`, this repo → `vendor/agentvis`)
-2. `device.mk`:      `include vendor/agentvis/agentvis.mk`
-3. `BoardConfig.mk`: `SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += vendor/agentvis/sepolicy/private`
-   (optional fallback rules: `BOARD_VENDOR_SEPOLICY_DIRS += vendor/agentvis/sepolicy/vendor`)
-4. Build + flash the image once (sepolicy needs an image), then the app can
-   be updated day-2 with plain `adb install -r` — no root, data preserved.
+```bash
+m AIPhoneAssistant
+adb install -r out/target/product/lmi/system_ext/priv-app/AIPhoneAssistant/AIPhoneAssistant.apk
+```
 
-Manual, repo-by-repo equivalent of the above: keep reading.
+(no root needed once the system copy exists; data preserved).
 
-## Tier B — manual build-tree setup (equivalent to Tier A, step by step)
+## Tier B — integrate into your own product by hand
 
-1. Put the app source into the build tree — either by hand:
+For trees where you maintain the device config yourself:
 
+1. App source into the tree (or `./build.sh <tree> <combo>` from the app
+   repo, which does exactly this copy):
    ```bash
-   AOSP_ROOT=/path/to/lineage
-   APP_SOURCE=/path/to/aiphone_assistant
    APP_DEST=$AOSP_ROOT/packages/apps/AIPhoneAssistant
-   cp -r "$APP_SOURCE/src" "$APP_SOURCE/res" "$APP_DEST/"
-   cp "$APP_SOURCE"/{Android.bp,AndroidManifest.xml,privapp-permissions-aiphoneassistant.xml,proguard.flags} "$APP_DEST/"
+   cp -r src res "$APP_DEST/"
+   cp Android.bp AndroidManifest.xml privapp-permissions-aiphoneassistant.xml proguard.flags "$APP_DEST/"
    ```
-
-   or with the app repo's generic wrapper (no device-specific logic):
-
-   ```bash
-   ./build.sh /path/to/lineage <product>-<release>-<variant> <product>
-   ```
-
-2. Register the modules in the target's product makefile (see
-   `device.mk.snippet`):
-
+2. `device.mk` (snippet: `device.mk.snippet`, or `include vendor/agentvis/agentvis.mk`):
    ```make
    PRODUCT_PACKAGES += AIPhoneAssistant privapp-permissions-aiphoneassistant
    ```
-
-3. Install the SELinux rules:
-
-   ```bash
-   COMMON=$AOSP_ROOT/device/<vendor>/<common>
-   cp sepolicy/private/aiphoneassistant.te "$COMMON/sepolicy/private/"
-   cp sepolicy/vendor/aiphoneassistant.te   "$COMMON/sepolicy/vendor/"   # optional
+3. BoardConfig / sepolicy:
+   ```make
+   SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += vendor/agentvis/integrations/aiphoneassistant/sepolicy/private
+   # optional, capture fallback only, SoC-specific:
+   BOARD_VENDOR_SEPOLICY_DIRS += vendor/agentvis/integrations/aiphoneassistant/sepolicy/vendor
    ```
-
-   The private rules are **required** (screen capture + input injection).
-   Rules only take effect after a full image build + flash.
-
-4. Build, flash, first boot:
-
-   ```bash
-   source build/envsetup.sh && lunch <product>-<release>-<variant>
-   m AIPhoneAssistant -j"$(nproc)"      # app-only build (no sepolicy change)
-   ```
-
-   Output APK:
-   `out/target/product/<target>/system_ext/priv-app/AIPhoneAssistant/AIPhoneAssistant.apk`
+4. Full image build once (sepolicy must be baked), then `adb install -r` for
+   day-2 updates.
 
 ## Tier C — rooted device, no ROM build (Magisk module)
 
 `magisk/` is a working module skeleton:
 
-- `system/system_ext/priv-app/AIPhoneAssistant/` — drop the platform-signed
-  APK here, then `zip -r agentvis_aiphone.zip .` from the `magisk/` dir.
-- `system/system_ext/etc/permissions/` — privapp allowlist (shipped).
-- `post-fs-data.sh` — live-patches SELinux with `magiskpolicy --live`
-  (same allows as the static rules).
+- drop the platform-signed APK into `system/system_ext/priv-app/AIPhoneAssistant/`,
+  zip the `magisk/` dir, flash in Magisk
+- `post-fs-data.sh` live-patches SELinux (`magiskpolicy --live`, same allows
+  as the static rules)
+- limitation: still needs a platform-signed APK matching the installed ROM.
 
-Caveats:
+## Developer quick path (app-only iterations, any machine)
 
-- Still requires the platform-signed APK (Tier C without ROM keys cannot get
-  signature permissions — no workaround short of a build).
-- SELinux patch is runtime-only; re-applied by Magisk on every boot.
-- Privapp allowlist via systemless overlay works on current Magisk; if
-  permissions do not grant, check `dumpsys package <pkg>` for
-  `PRIVATE_FLAG_PRIVILEGED` and the allowlist scan log.
+From the app repo — no device-specific values, all inputs are arguments or
+env vars:
+
+```bash
+./build.sh $AOSP_ROOT lineage_lmi-ap3a-userdebug     # or AOSP_ROOT/LUNCH_COMBO env
+adb install -r out/target/product/lmi/system_ext/priv-app/AIPhoneAssistant/AIPhoneAssistant.apk
+```
 
 ## Known pitfalls
 
@@ -108,12 +102,3 @@ Caveats:
 - Reasoning LLMs may return empty `content` (chain-of-thought only): the app
   falls back to `reasoning_content` and uses a large `max_tokens`; keep the
   gateway's per-request timeout above the app's 90 s round budget.
-
-## This machine's lmi shortcuts
-
-`scripts/` keeps the lmi-hardcoded wrappers that used to live in the app
-repo (removed there to keep it device-neutral):
-
-- `scripts/build_lmi.sh` — app-repo `build.sh` with this machine's tree path
-  and lunch combo filled in
-- `scripts/push_lmi.sh`  — build-if-needed + `adb install -r` deploy
