@@ -2,10 +2,10 @@
 <!--
   repo sync integration for AIPhoneAssistant + WD40.
 
-  Copy to .repo/local_manifests/agentvis.xml, then:
+  Copy to .repo/local_manifests/ed40.xml, then:
       repo sync aiphone_assistant WD40
   App lands in packages/apps/AIPhoneAssistant; this repo lands in
-  vendor/agentvis (the paths agentvis.mk / sepolicy dirs expect).
+  vendor/ed40 (the paths the lunch products and sepolicy dirs expect).
 
   NOTE: remotes below point at the personal GitHub accounts until the
   AgentVisOS org repos exist — switch `remote` then.
@@ -16,6 +16,6 @@
 
     <project name="aiphone_assistant" path="packages/apps/AIPhoneAssistant"
              remote="personal" revision="main" />
-    <project name="WD40" path="vendor/agentvis"
+    <project name="WD40" path="vendor/ed40"
              remote="personal" revision="main" />
 </manifest>

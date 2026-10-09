@@ -10,19 +10,19 @@ Canonical app source: <https://github.com/inokinoki/aiphone_assistant>.
 
 ```
 1. repo init -u <lineageos-manifest>       # stock step
-2. add .repo/local_manifests/agentvis.xml  # <-- insertion point 1 (fetch)
-3. repo sync                               # app -> packages/apps/, this repo -> vendor/agentvis/
-4. lunch lineage_agentvis_lmi-ap3a-userdebug       # <-- insertion point 2 (product choice)
+2. add .repo/local_manifests/ed40.xml  # <-- insertion point 1 (fetch)
+3. repo sync                               # app -> packages/apps/, this repo -> vendor/ed40/
+4. lunch lineage_ed40_lmi-ap3a-userdebug       # <-- insertion point 2 (product choice)
 5. m bacon                                 # full image, nothing upstream modified
 ```
 
-The `lineage_agentvis_*` product (registered by `AndroidProducts.mk` at the root of
+The `lineage_ed40_*` product (registered by `AndroidProducts.mk` at the root of
 this repo) inherits the stock `lineage_lmi` product and appends the app,
 its privapp allowlist and the SELinux rules — the same pattern used by
 LineageOS for microG / /e/OS style distributions. Upstream files are never
 edited, so `repo sync` stays clean.
 
-For other devices: copy `lineage_agentvis_lmi.mk` to `lineage_agentvis_<target>.mk`, point
+For other devices: copy `lineage_ed40_lmi.mk` to `lineage_ed40_<target>.mk`, point
 the `inherit-product` line at that device's stock makefile, and register it
 in `AndroidProducts.mk`. Everything else (sepolicy private rules, app
 modules) is device-agnostic.
@@ -33,10 +33,10 @@ modules) is device-agnostic.
   signature match) — signature permissions only grant on a matching
   signature.
 - SELinux must allow `system_app` → SurfaceFlinger / InputManager (the
-  `lineage_agentvis_*` product adds these; see Tier B/C if you cannot use it).
+  `lineage_ed40_*` product adds these; see Tier B/C if you cannot use it).
 - The app runs as `android.uid.system`, `system_ext_specific` + privileged.
 
-## Tier A — build with the agentvis product (recommended)
+## Tier A — build with the ed40 product (recommended)
 
 The five steps above. First full build bakes sepolicy into the image; after
 that, app-only iterations are:
@@ -59,15 +59,15 @@ For trees where you maintain the device config yourself:
    cp -r src res "$APP_DEST/"
    cp Android.bp AndroidManifest.xml privapp-permissions-aiphoneassistant.xml proguard.flags "$APP_DEST/"
    ```
-2. `device.mk` (snippet: `device.mk.snippet`, or `include vendor/agentvis/agentvis.mk`):
+2. `device.mk` (snippet: `device.mk.snippet`):
    ```make
    PRODUCT_PACKAGES += AIPhoneAssistant privapp-permissions-aiphoneassistant
    ```
 3. BoardConfig / sepolicy:
    ```make
-   SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += vendor/agentvis/integrations/aiphoneassistant/sepolicy/private
+   SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += vendor/ed40/integrations/aiphoneassistant/sepolicy/private
    # optional, capture fallback only, SoC-specific:
-   BOARD_VENDOR_SEPOLICY_DIRS += vendor/agentvis/integrations/aiphoneassistant/sepolicy/vendor
+   BOARD_VENDOR_SEPOLICY_DIRS += vendor/ed40/integrations/aiphoneassistant/sepolicy/vendor
    ```
 4. Full image build once (sepolicy must be baked), then `adb install -r` for
    day-2 updates.
