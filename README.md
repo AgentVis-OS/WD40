@@ -7,8 +7,15 @@ permission allowlists, image-build and deployment runbooks — so these changes
 are versioned, reviewable, and reusable across devices instead of living as
 uncommitted local edits inside someone's LineageOS/AOSP tree.
 
-Named after the lubricant: this repo is what makes the parts that must live
-inside an Android build tree stop squeaking.
+## Why "WD40"
+
+Where LineageOS takes its name from *lineage* — a bloodline carried on
+after CyanogenMod ended — WD40 is the bloodline's counterpart for machines:
+what gets passed down the generations of an AgentVis OS device is not blood
+but the lubricant. The SELinux rules, product configs and runbooks kept
+here are what each new device generation inherits, so the lineage keeps
+moving. Hence the lunch products read `lineage_wd40_<target>`: lineage
+above, WD-40 within.
 
 ## Relationship to other projects
 
