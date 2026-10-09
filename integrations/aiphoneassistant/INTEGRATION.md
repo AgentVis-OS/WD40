@@ -1,82 +1,106 @@
-# AIPhoneAssistant — system integration runbook
+# AIPhoneAssistant — porting guide
 
-Concrete steps to embed the AIPhoneAssistant agent app into an AOSP/LineageOS
-build. Reference integration: LineageOS 22.2 (Android 15), target `lmi`
-(Xiaomi POCO F2 Pro). Generalization notes: see
+Three tiers, pick by audience. Reference integration: LineageOS 22.2
+(Android 15), target `lmi` (Xiaomi POCO F2 Pro). Generalization notes:
 [`../../docs/system-integrations.md`](../../docs/system-integrations.md).
 
-Canonical app source: <https://github.com/inokinoki/aiphone_assistant>
-(all build/deploy scripts referenced below live there).
+Canonical app source: <https://github.com/inokinoki/aiphone_assistant>.
 
-## 0. Prerequisites
+## Hard requirements (all tiers)
 
-- A platform-signed build you control (`userdebug` is fine) with the app's
-  key in the build's signing config — otherwise signature permissions will
-  not grant.
-- `adb` working; for first-time install onto a device without the system
-  copy you need either a flashed image or root remount (see §4).
+- The APK must be signed with **the same platform key as the ROM** —
+  signature permissions (`READ_FRAME_BUFFER`, `INJECT_EVENTS`,
+  `INTERNAL_SYSTEM_WINDOW`, …) only grant on a matching signature. A self
+  built ROM ships AOSP testkeys (or your release keys), so build the app from
+  the same tree.
+- SELinux must allow `system_app` → SurfaceFlinger / InputManager. Either
+  baked into the image (Tier A/B) or live-patched (Tier C).
+- The app runs as `android.uid.system` and is `system_ext_specific` +
+  `privileged` — it is a system component, not a normal sideload.
 
-## 1. Put the app source into the build tree
+## Tier A — ROM builders, one-time setup (recommended)
 
-```bash
-AOSP_ROOT=/path/to/lineage
-APP_SOURCE=/path/to/aiphone_assistant
-APP_DEST=$AOSP_ROOT/packages/apps/AIPhoneAssistant
+Fastest full integration, survives every future build:
 
-cp -r "$APP_SOURCE/src" "$APP_SOURCE/res" "$APP_DEST/"
-cp "$APP_SOURCE"/{Android.bp,AndroidManifest.xml,privapp-permissions-aiphoneassistant.xml,proguard.flags} "$APP_DEST/"
-```
+1. Copy `local_manifests/agentvis.xml` into `.repo/local_manifests/`, then:
+   `repo sync aiphone_assistant WD40`
+   (app → `packages/apps/AIPhoneAssistant`, this repo → `vendor/agentvis`)
+2. `device.mk`:      `include vendor/agentvis/agentvis.mk`
+3. `BoardConfig.mk`: `SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += vendor/agentvis/sepolicy/private`
+   (optional fallback rules: `BOARD_VENDOR_SEPOLICY_DIRS += vendor/agentvis/sepolicy/vendor`)
+4. Build + flash the image once (sepolicy needs an image), then the app can
+   be updated day-2 with plain `adb install -r` — no root, data preserved.
 
-(`build_lmi.sh` in the app repo automates this for lmi.)
+Manual, repo-by-repo equivalent of the above: keep reading.
 
-## 2. Register the modules in the target
+## Tier B — manual build-tree setup (equivalent to Tier A, step by step)
 
-Add to the target's product makefile (see `device.mk.snippet`):
+1. Put the app source into the build tree:
 
-```make
-PRODUCT_PACKAGES += AIPhoneAssistant privapp-permissions-aiphoneassistant
-```
+   ```bash
+   AOSP_ROOT=/path/to/lineage
+   APP_SOURCE=/path/to/aiphone_assistant
+   APP_DEST=$AOSP_ROOT/packages/apps/AIPhoneAssistant
+   cp -r "$APP_SOURCE/src" "$APP_SOURCE/res" "$APP_DEST/"
+   cp "$APP_SOURCE"/{Android.bp,AndroidManifest.xml,privapp-permissions-aiphoneassistant.xml,proguard.flags} "$APP_DEST/"
+   ```
 
-## 3. Install the SELinux rules
+   (`build_lmi.sh` in the app repo automates this for lmi.)
 
-```bash
-COMMON=$AOSP_ROOT/device/<vendor>/<common>
-cp sepolicy/private/aiphoneassistant.te "$COMMON/sepolicy/private/"
-cp sepolicy/vendor/aiphoneassistant.te   "$COMMON/sepolicy/vendor/"   # optional, see docs
-```
+2. Register the modules in the target's product makefile (see
+   `device.mk.snippet`):
 
-The private rules are **required** (screen capture + input injection).
-Rules only take effect after a full image build + flash.
+   ```make
+   PRODUCT_PACKAGES += AIPhoneAssistant privapp-permissions-aiphoneassistant
+   ```
 
-## 4. Build, flash, first boot
+3. Install the SELinux rules:
 
-```bash
-source build/envsetup.sh && lunch <product>-<release>-<variant>
-m AIPhoneAssistant -j"$(nproc)"      # app-only build (no sepolicy change)
-# sepolicy changed? build/flash the full image instead.
-```
+   ```bash
+   COMMON=$AOSP_ROOT/device/<vendor>/<common>
+   cp sepolicy/private/aiphoneassistant.te "$COMMON/sepolicy/private/"
+   cp sepolicy/vendor/aiphoneassistant.te   "$COMMON/sepolicy/vendor/"   # optional
+   ```
 
-Output APK:
-`out/target/product/<target>/system_ext/priv-app/AIPhoneAssistant/AIPhoneAssistant.apk`
+   The private rules are **required** (screen capture + input injection).
+   Rules only take effect after a full image build + flash.
 
-## 5. Day-2 app updates (no root)
+4. Build, flash, first boot:
 
-```bash
-adb install -r out/target/product/<target>/system_ext/priv-app/AIPhoneAssistant/AIPhoneAssistant.apk
-```
+   ```bash
+   source build/envsetup.sh && lunch <product>-<release>-<variant>
+   m AIPhoneAssistant -j"$(nproc)"      # app-only build (no sepolicy change)
+   ```
 
-Privileged flags and permissions survive the update (platform-signed update
-of a system app). Data directory (`/data/data/<package>/`, holds the SQLite
-chat store + API config) survives too.
+   Output APK:
+   `out/target/product/<target>/system_ext/priv-app/AIPhoneAssistant/AIPhoneAssistant.apk`
 
-## 6. Known pitfalls
+## Tier C — rooted device, no ROM build (Magisk module)
 
-- `avc: denied` in `dmesg` during capture/injection → sepolicy §3 missing or
-  not flashed.
-- `INSTALL_FAILED_...` on `adb install` of the priv-app → the device copy
-  was never on the system partition; flash once or use root remount.
-- Enabling "Root debugging" / adbd root is NOT needed for app updates, only
-  for pushing into `/system` directly.
+`magisk/` is a working module skeleton:
+
+- `system/system_ext/priv-app/AIPhoneAssistant/` — drop the platform-signed
+  APK here, then `zip -r agentvis_aiphone.zip .` from the `magisk/` dir.
+- `system/system_ext/etc/permissions/` — privapp allowlist (shipped).
+- `post-fs-data.sh` — live-patches SELinux with `magiskpolicy --live`
+  (same allows as the static rules).
+
+Caveats:
+
+- Still requires the platform-signed APK (Tier C without ROM keys cannot get
+  signature permissions — no workaround short of a build).
+- SELinux patch is runtime-only; re-applied by Magisk on every boot.
+- Privapp allowlist via systemless overlay works on current Magisk; if
+  permissions do not grant, check `dumpsys package <pkg>` for
+  `PRIVATE_FLAG_PRIVILEGED` and the allowlist scan log.
+
+## Known pitfalls
+
+- `avc: denied` in `dmesg` during capture/injection → SELinux rules missing
+  or not flashed.
+- `INSTALL_FAILED_...` when updating a priv-app that is not yet on the
+  system partition → flash once, or use root remount.
+- adbd root / "Root debugging" is NOT needed for day-2 app updates.
 - Reasoning LLMs may return empty `content` (chain-of-thought only): the app
   falls back to `reasoning_content` and uses a large `max_tokens`; keep the
   gateway's per-request timeout above the app's 90 s round budget.

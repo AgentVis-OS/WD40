@@ -1,0 +1,6 @@
+id=agentvis_aiphone
+name=AI Phone Assistant (AgentVis)
+version=v0.1
+versionCode=1
+author=Inoki <veyx.shaw@gmail.com>
+description=Installs AIPhoneAssistant as a systemless system_ext priv-app and live-patches SELinux so system_app may capture the screen (SurfaceFlinger) and inject input (InputManager). The bundled APK must be signed with YOUR ROM's platform key, otherwise signature permissions will not grant.

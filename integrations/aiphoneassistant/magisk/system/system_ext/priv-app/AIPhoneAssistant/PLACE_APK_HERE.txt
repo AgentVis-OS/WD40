@@ -1,0 +1,1 @@
+Place the platform-signed AIPhoneAssistant.apk here (zip -r module.zip . from the magisk/ dir).
