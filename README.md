@@ -1,7 +1,7 @@
 # WD40
 
 Integration glue and system-side change log for the **AgentVis OS** device
-projects. WD40 (a.k.a. ed40 in lunch target names) records everything an agent app needs *outside of its own
+projects. WD40 records everything an agent app needs *outside of its own
 source tree* — SELinux policy, product makefile entries, privileged
 permission allowlists, image-build and deployment runbooks — so these changes
 are versioned, reviewable, and reusable across devices instead of living as
@@ -26,7 +26,7 @@ permissions, SELinux, flashing), it belongs here.
 - [`docs/system-integrations.md`](docs/system-integrations.md) — the full
   inventory of system-side changes made so far, each with what / where / why
   and notes on generalizing to other devices and packages.
-- `lineage_ed40_*` lunch products (root `AndroidProducts.mk`): stock
+- `lineage_wd40_*` lunch products (root `AndroidProducts.mk`): stock
   device product + the integration, zero upstream edits — the
 - [`integrations/aiphoneassistant/`](integrations/aiphoneassistant/) — the
   concrete artifacts for the AIPhoneAssistant integration (sepolicy rules,

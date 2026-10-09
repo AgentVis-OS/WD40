@@ -97,7 +97,7 @@ adb install -r out/target/product/<target>/system_ext/priv-app/AIPhoneAssistant/
 1. Copy `integrations/aiphoneassistant/sepolicy/private/*.te` into the
    target's system_ext private sepolicy dir; confirm
    `SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS` includes it.
-2. Either lunch `lineage_ed40_<target>` (see the runbook) or add the `PRODUCT_PACKAGES` line to the target's product makefile.
+2. Either lunch `lineage_wd40_<target>` (see the runbook) or add the `PRODUCT_PACKAGES` line to the target's product makefile.
 3. Build the full image once (`m AIPhoneAssistant` alone is not enough for
    sepolicy), flash, then iterate with `adb install -r` for app updates.
 4. Only if the capture fallback is exercised: add vendor sepolicy rules from

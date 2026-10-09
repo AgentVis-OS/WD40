@@ -12,10 +12,10 @@ flowchart TD
     start(["Porter with a device"]) --> q{"How do you build?"}
 
     q -->|"I build my ROM<br/>(Tier A, recommended)"| a1["repo init -u lineage manifest<br/>(stock step)"]
-    a1 --> a2["★1 copy ed40.xml into<br/>.repo/local_manifests/"]
+    a1 --> a2["★1 copy wd40.xml into<br/>.repo/local_manifests/"]
     a2 --> a3["repo sync"]
-    a3 --> a4["app → packages/apps/AIPhoneAssistant<br/>WD40 → vendor/ed40"]
-    a4 --> a5["★2 lunch lineage_ed40_&lt;target&gt;-ap3a-userdebug<br/>(product inherits stock lineage_&lt;target&gt;)"]
+    a3 --> a4["app → packages/apps/AIPhoneAssistant<br/>WD40 → vendor/wd40"]
+    a4 --> a5["★2 lunch lineage_wd40_&lt;target&gt;-ap3a-userdebug<br/>(product inherits stock lineage_&lt;target&gt;)"]
     a5 --> a6["m bacon — full image"]
     a6 --> a7["flash once (bakes SELinux)"]
     a7 --> day2["day-2 app updates:<br/>m AIPhoneAssistant && adb install -r<br/>(no root, data kept)"]
@@ -39,19 +39,19 @@ flowchart TD
 flowchart LR
     subgraph repos["GitHub (→ AgentVis OS org)"]
         APP["aiphone_assistant<br/>(app sources, Android.bp,<br/>privapp allowlist, build.sh)"]
-        WD["WD40 (= vendor/ed40)<br/>lunch products · sepolicy ·<br/>local_manifests · magisk · docs"]
+        WD["WD40 (= vendor/wd40)<br/>lunch products · sepolicy ·<br/>local_manifests · magisk · docs"]
     end
 
     subgraph tree["AOSP / LineageOS build tree"]
         P["packages/apps/AIPhoneAssistant"]
-        V["vendor/ed40"]
+        V["vendor/wd40"]
         D["device/&lt;vendor&gt;/&lt;target&gt;<br/>(upstream — never edited)"]
         IMG["image: system_ext/priv-app/…apk<br/>+ permissions XML + SELinux policy"]
     end
 
     APP -->|local_manifests sync| P
     WD -->|local_manifests sync| V
-    V -->|"lineage_ed40_&lt;target&gt;<br/>inherit-product + += "| IMG
+    V -->|"lineage_wd40_&lt;target&gt;<br/>inherit-product + += "| IMG
     P --> IMG
     D -->|stock product inherits| IMG
 
