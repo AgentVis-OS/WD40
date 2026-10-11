@@ -22,9 +22,10 @@ its privapp allowlist and the SELinux rules — the same pattern used by
 LineageOS for microG / /e/OS style distributions. Upstream files are never
 edited, so `repo sync` stays clean.
 
-For other devices: copy `lineage_wd40_lmi.mk` to `lineage_wd40_<target>.mk`, point
-the `inherit-product` line at that device's stock makefile, and register it
-in `AndroidProducts.mk`. Everything else (sepolicy private rules, app
+For other devices: create `devices/<target>/lineage_wd40_<target>.mk`
+(inherit that device's stock product makefile, then add the same
+PRODUCT_PACKAGES / sepolicy lines) and register it in the root
+`AndroidProducts.mk`. Everything else (sepolicy private rules, app
 modules) is device-agnostic.
 
 ## Hard requirements (all tiers)

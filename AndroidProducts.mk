@@ -10,7 +10,7 @@
 # the host LineageOS version.
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lineage_wd40_lmi.mk
+    $(LOCAL_DIR)/devices/lmi/lineage_wd40_lmi.mk
 
 COMMON_LUNCH_CHOICES := \
     lineage_wd40_lmi-ap3a-userdebug \
