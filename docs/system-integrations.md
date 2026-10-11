@@ -9,7 +9,7 @@ Reference device: Xiaomi POCO F2 Pro (`lmi`, sm8250-common), LineageOS 22.2
 
 The app side (sources, `Android.bp`, manifest, privapp allowlist XML,
 `build_lmi.sh`/`push.sh` scripts) lives in the
-[AIPhoneAssistant repo](https://github.com/inokinoki/aiphone_assistant) and is
+[AIPhoneAssistant repo](https://github.com/AgentVis-OS/aiphone_assistant) and is
 mirrored into the AOSP tree at `packages/apps/AIPhoneAssistant/` by the build
 script — it is **not** re-listed here.
 

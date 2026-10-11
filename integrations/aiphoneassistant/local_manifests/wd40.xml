@@ -7,15 +7,12 @@
   App lands in packages/apps/AIPhoneAssistant; this repo lands in
   vendor/wd40 (the paths the lunch products and sepolicy dirs expect).
 
-  NOTE: remotes below point at the personal GitHub accounts until the
-  AgentVisOS org repos exist — switch `remote` then.
 -->
 <manifest>
-    <remote name="agentvis" fetch="https://github.com/AgentVisOS" />
-    <remote name="personal" fetch="https://github.com/Inokinoki" />
+    <remote name="agentvis" fetch="https://github.com/AgentVis-OS" />
 
     <project name="aiphone_assistant" path="packages/apps/AIPhoneAssistant"
-             remote="personal" revision="main" />
+             remote="agentvis" revision="main" />
     <project name="WD40" path="vendor/wd40"
-             remote="personal" revision="main" />
+             remote="agentvis" revision="main" />
 </manifest>

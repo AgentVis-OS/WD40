@@ -21,7 +21,7 @@ above, WD-40 within.
 
 | Project | Contains | Hosted |
 |---|---|---|
-| [AIPhoneAssistant](https://github.com/Inokinoki/aiphone_assistant) | The agent app itself (Java sources, res, manifest, Android.bp, privapp allowlist, app-side build scripts) | GitHub (Inokinoki), moving under **AgentVis OS** |
+| [AIPhoneAssistant](https://github.com/AgentVis-OS/aiphone_assistant) | The agent app itself (Java sources, res, manifest, Android.bp, privapp allowlist, app-side build scripts) | GitHub (**AgentVis-OS** org) |
 | **WD40** (this repo) | Everything the app needs *in the system/build tree*: sepolicy rules, `device.mk` snippets, integration runbooks, generalized how-tos | Local today; to be hosted under the **AgentVis OS** organization |
 
 Rule of thumb: if deleting it would break the *app build*, it belongs to the

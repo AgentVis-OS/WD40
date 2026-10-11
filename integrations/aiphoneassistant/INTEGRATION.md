@@ -4,7 +4,7 @@ How the agent app plugs into a standard AOSP/LineageOS workflow. Reference:
 LineageOS 22.2 (Android 15), device `lmi` (Xiaomi POCO F2 Pro). For the
 inventory of what/where/why: [`../../docs/system-integrations.md`](../../docs/system-integrations.md).
 
-Canonical app source: <https://github.com/inokinoki/aiphone_assistant>.
+Canonical app source: <https://github.com/AgentVis-OS/aiphone_assistant>.
 
 ## Where this plugs into the standard build flow
 
