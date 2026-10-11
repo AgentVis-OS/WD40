@@ -33,8 +33,9 @@ permissions, SELinux, flashing), it belongs here.
 - [`docs/system-integrations.md`](docs/system-integrations.md) — the full
   inventory of system-side changes made so far, each with what / where / why
   and notes on generalizing to other devices and packages.
-- `lineage_wd40_*` lunch products (root `AndroidProducts.mk`): the stock
-  device product plus this integration, with zero upstream edits.
+- `devices/<target>/lineage_wd40_<target>.mk` + the root `AndroidProducts.mk`
+  registration: the stock device product plus this integration, with zero
+  upstream edits.
 - [`integrations/aiphoneassistant/`](integrations/aiphoneassistant/) — the
   concrete artifacts for the AIPhoneAssistant integration (sepolicy rules,
   device.mk snippet, privapp allowlist, Magisk module skeleton) plus a
