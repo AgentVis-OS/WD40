@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1560" viewBox="0 0 1320 1560" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1200" height="1600" fill="#fafbfc"/>
+  <text x="660" y="70" text-anchor="middle" font-size="34" font-weight="bold" fill="#24292f">AgentVis OS — logo concepts (LineageOS cycle variants)</text>
+
+  <!-- ===== Concept 1: The Seeing Cycle ===== -->
+  <g transform="translate(210,300)">
+    <text x="0" y="-160" font-size="22" font-weight="bold" fill="#24292f" text-anchor="middle">1 · The Seeing Cycle</text>
+    <text x="0" y="-132" font-size="14" fill="#57606a" text-anchor="middle">lineage ring + pupil: the OS grows an eye</text>
+    <!-- outer ring: two arcs (lineage style) -->
+    <circle cx="0" cy="0" r="90" fill="none" stroke="url(#losblue)" stroke-width="22"
+            stroke-linecap="round" stroke-dasharray="424 142" transform="rotate(115)"/>
+    <!-- pupil -->
+    <circle cx="0" cy="0" r="34" fill="#1b2a4a"/>
+    <circle cx="-11" cy="-11" r="9" fill="#7de0e6"/>
+    <!-- gaze marker at ring gap -->
+    <circle cx="63" cy="-63" r="12" fill="#f5a623"/>
+    <text x="0" y="170" text-anchor="middle" font-size="20" fill="#24292f">AgentVis OS</text>
+  </g>
+
+  <!-- ===== Concept 2: Layered Cycle ===== -->
+  <g transform="translate(660,300)">
+    <text x="0" y="-160" font-size="22" font-weight="bold" fill="#24292f" text-anchor="middle">2 · Layered Cycle</text>
+    <text x="0" y="-132" font-size="14" fill="#57606a" text-anchor="middle">lineage ring / WD40 layer / agent core</text>
+    <circle cx="0" cy="0" r="96" fill="none" stroke="url(#losblue)" stroke-width="14"
+            stroke-dasharray="452 152" stroke-linecap="round" transform="rotate(115)"/>
+    <circle cx="0" cy="0" r="62" fill="none" stroke="#8a939e" stroke-width="12"
+            stroke-dasharray="292 98" stroke-linecap="round" transform="rotate(295)"/>
+    <circle cx="0" cy="0" r="30" fill="#1976d2"/>
+    <circle cx="0" cy="0" r="11" fill="#ffffff"/>
+    <text x="0" y="170" text-anchor="middle" font-size="20" fill="#24292f">AgentVis OS</text>
+  </g>
+
+  <!-- ===== Concept 3: Eye of the Lineage ===== -->
+  <g transform="translate(1110,300)">
+    <text x="0" y="-160" font-size="22" font-weight="bold" fill="#24292f" text-anchor="middle">3 · Eye of the Lineage</text>
+    <text x="0" y="-132" font-size="14" fill="#57606a" text-anchor="middle">eyelids from the lineage arcs, iris = cycle</text>
+    <path d="M -110 0 Q 0 -130 110 0" fill="none" stroke="url(#losblue)" stroke-width="20" stroke-linecap="round"/>
+    <path d="M -110 0 Q 0 130 110 0" fill="none" stroke="url(#losblue)" stroke-width="20" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="56" fill="#dff1fb" stroke="url(#losblue)" stroke-width="8"/>
+    <circle cx="0" cy="0" r="26" fill="#1b2a4a"/>
+    <circle cx="-9" cy="-9" r="7" fill="#7de0e6"/>
+    <text x="0" y="170" text-anchor="middle" font-size="20" fill="#24292f">AgentVis OS</text>
+  </g>
+
+  <!-- ===== Concept 4: See–Think–Act ring ===== -->
+  <g transform="translate(330,800)">
+    <text x="0" y="-160" font-size="22" font-weight="bold" fill="#24292f" text-anchor="middle">4 · See · Think · Act</text>
+    <text x="0" y="-132" font-size="14" fill="#57606a" text-anchor="middle">three-arc cycle, one color per phase</text>
+    <!-- three arcs: see(blue) think(purple) act(green), gaps with arrowheads -->
+    <path d="M 88 -52 A 102 102 0 0 0 -88 -52" fill="none" stroke="#1976d2" stroke-width="24" stroke-linecap="round"/>
+    <path d="M -96 30 A 102 102 0 0 0 -8 101" fill="none" stroke="#7e57c2" stroke-width="24" stroke-linecap="round"/>
+    <path d="M 96 30 A 102 102 0 0 0 8 101" fill="none" stroke="#2e7d32" stroke-width="24" stroke-linecap="round"/>
+    <polygon points="97,-63 112,-42 82,-44" fill="#1976d2"/>
+    <polygon points="-16,108 10,120 -12,133" fill="#2e7d32"/>
+    <polygon points="-105,42 -78,40 -95,64" fill="#7e57c2"/>
+    <circle cx="0" cy="0" r="26" fill="#1b2a4a"/>
+    <circle cx="-9" cy="-9" r="7" fill="#7de0e6"/>
+    <text x="0" y="170" text-anchor="middle" font-size="20" fill="#24292f">AgentVis OS</text>
+  </g>
+
+  <!-- ===== Concept 4b: monochrome version ===== -->
+  <g transform="translate(990,800)">
+    <text x="0" y="-160" font-size="22" font-weight="bold" fill="#24292f" text-anchor="middle">4b · monochrome (small-size test)</text>
+    <text x="0" y="-132" font-size="14" fill="#57606a" text-anchor="middle">one color, thicker arcs, no pupil highlight</text>
+    <path d="M 88 -52 A 102 102 0 0 0 -88 -52" fill="none" stroke="#24292f" stroke-width="30" stroke-linecap="round"/>
+    <path d="M -96 30 A 102 102 0 0 0 -8 101" fill="none" stroke="#24292f" stroke-width="30" stroke-linecap="round"/>
+    <path d="M 96 30 A 102 102 0 0 0 8 101" fill="none" stroke="#24292f" stroke-width="30" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="30" fill="#24292f"/>
+    <text x="0" y="170" text-anchor="middle" font-size="20" fill="#24292f">AgentVis OS</text>
+  </g>
+
+  <!-- ===== Concept 5: Wordmark ===== -->
+  <g transform="translate(660,1290)">
+    <text x="0" y="-120" font-size="22" font-weight="bold" fill="#24292f" text-anchor="middle">5 · Wordmark</text>
+    <text x="0" y="-92" font-size="14" fill="#57606a" text-anchor="middle">the cycle replaces the "V" of AgentVis… and forms an eye</text>
+    <g font-size="72" font-weight="bold" fill="#24292f">
+      <text x="-330" y="0">A</text>
+      <text x="-272" y="0">g</text>
+      <text x="-228" y="0">e</text>
+      <text x="-184" y="0">n</text>
+      <text x="-140" y="0">t</text>
+      <text x="-108" y="0">V</text>
+      <text x="-58" y="0">i</text>
+      <text x="-36" y="0">s</text>
+    </g>
+    <!-- cycle-ring V: overlapping ring as the V of "Vis" -->
+    <g transform="translate(150,-24)">
+      <circle cx="0" cy="0" r="44" fill="none" stroke="url(#losblue)" stroke-width="14"
+              stroke-dasharray="208 68" stroke-linecap="round" transform="rotate(115)"/>
+      <circle cx="0" cy="0" r="15" fill="#1b2a4a"/>
+      <circle cx="-5" cy="-5" r="4" fill="#7de0e6"/>
+    </g>
+    <text x="196" y="0" font-size="72" font-weight="bold" fill="#24292f">OS</text>
+    <text x="0" y="70" text-anchor="middle" font-size="16" fill="#57606a">AgentVis OS</text>
+  </g>
+
+  <defs>
+    <linearGradient id="losblue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a416b"/>
+      <stop offset="1" stop-color="#2196f3"/>
+    </linearGradient>
+  </defs>
+</svg>
