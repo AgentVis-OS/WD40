@@ -47,7 +47,9 @@ m AIPhoneAssistant
 adb install -r out/target/product/lmi/system_ext/priv-app/AIPhoneAssistant/AIPhoneAssistant.apk
 ```
 
-(no root needed once the system copy exists; data preserved).
+(no root needed once the system copy exists; data preserved). For faster
+app-only iteration see ["Faster app-only iteration"](#faster-app-only-iteration-skips-soong)
+below.
 
 ## Tier B — integrate into your own product by hand
 
@@ -93,6 +95,63 @@ env vars:
 adb install -r out/target/product/lmi/system_ext/priv-app/AIPhoneAssistant/AIPhoneAssistant.apk
 ```
 
+## Faster app-only iteration (skips Soong)
+
+`m AIPhoneAssistant` re-runs Soong analysis on every invocation, which costs
+minutes on large trees even for a one-file change. For **Java-only** changes,
+once the tree has any successful full build, rebuild in ~2 minutes directly
+from the app repo. All inputs come from the previous build; `$TREE` is the
+AOSP/LineageOS tree root:
+
+```bash
+FRAMEWORK=$TREE/out/target/common/obj/JAVA_LIBRARIES/framework-minus-apex_intermediates/classes.jar
+CORE_LIBART=$TREE/out/target/common/obj/JAVA_LIBRARIES/core-libart.com.android.art_intermediates/classes.jar
+CORE_OJ=$TREE/out/target/common/obj/JAVA_LIBRARIES/core-oj.com.android.art_intermediates/classes.jar
+APP_JAR=$TREE/out/soong/.intermediates/packages/apps/AIPhoneAssistant/AIPhoneAssistant/android_common/javac/AIPhoneAssistant.jar
+OLD_APK=$TREE/out/target/product/<target>/system_ext/priv-app/AIPhoneAssistant/AIPhoneAssistant.apk
+```
+
+1. Compile the app sources against the previous build's jars:
+
+   ```bash
+   find <app-repo>/src -name '*.java' > sources.txt
+   $TREE/prebuilts/jdk/jdk21/linux-x86/bin/javac -source 17 -target 17 \
+     -nowarn -encoding UTF-8 -d classes @sources.txt \
+     -classpath "$FRAMEWORK:$CORE_LIBART:$CORE_OJ:$APP_JAR"
+   ```
+
+   Gotchas: `org.json` lives in **core-libart** (not framework-minus-apex);
+   the generated `R` classes come from the previous javac jar (`APP_JAR` —
+   the `busybox/R.jar` next to it is incomplete).
+
+2. Dex:
+
+   ```bash
+   find classes -name '*.class' > classlist.txt
+   $TREE/out/host/linux-x86/bin/d8 --release --min-api 34 \
+     --lib "$FRAMEWORK" --output dex @classlist.txt
+   ```
+
+3. Swap the dex into the previous APK and re-sign with the tree's platform
+   key (must match what signed the image — for `-userdebug` builds that is
+   the AOSP test platform key):
+
+   ```bash
+   cp "$OLD_APK" new.apk && zip -q new.apk dex/classes.dex
+   $TREE/out/host/linux-x86/bin/zipalign -f 4 new.apk aligned.apk
+   $TREE/out/host/linux-x86/bin/apksigner sign \
+     --key $TREE/build/target/product/security/platform.pk8 \
+     --cert $TREE/build/target/product/security/platform.x509.pem \
+     --out AIPhoneAssistant.apk aligned.apk
+   adb install -r AIPhoneAssistant.apk
+   ```
+
+Resource or manifest changes additionally need `aapt2 compile`/`link` to
+regenerate the resource base (framework-res for `-I` lives at
+`$TREE/out/target/product/<target>/obj/APPS/framework-res_intermediates/package.apk`);
+Java-only edits can skip it. The app repo's `AGENTS.md` tracks the same
+pipeline with exact verified commands.
+
 ## Known pitfalls
 
 - `avc: denied` in `dmesg` during capture/injection → SELinux rules missing
@@ -102,4 +161,5 @@ adb install -r out/target/product/lmi/system_ext/priv-app/AIPhoneAssistant/AIPho
 - adbd root / "Root debugging" is NOT needed for day-2 app updates.
 - Reasoning LLMs may return empty `content` (chain-of-thought only): the app
   falls back to `reasoning_content` and uses a large `max_tokens`; keep the
-  gateway's per-request timeout above the app's 90 s round budget.
+  gateway's per-request timeout above the app's round budget (300 s with a
+  two-stage abort: cancel, then force-recover 15 s later).
