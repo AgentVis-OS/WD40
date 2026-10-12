@@ -40,3 +40,8 @@ permissions, SELinux, flashing), it belongs here.
   concrete artifacts for the AIPhoneAssistant integration (sepolicy rules,
   device.mk snippet, privapp allowlist, Magisk module skeleton) plus a
   step-by-step porting guide.
+
+## License
+
+Copyright 2026 The AgentVis OS Authors. Licensed under the
+[Apache License, Version 2.0](LICENSE).
